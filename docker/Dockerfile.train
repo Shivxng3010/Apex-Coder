@@ -1,0 +1,22 @@
+FROM nvidia/cuda:12.1.1-base-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-dev \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu121 && \
+    pip3 install --no-cache-dir "unsloth[cu121-torch230] @ git+https://github.com/unslothai/unsloth.git" && \
+    pip3 install --no-cache-dir --no-deps trl peft accelerate bitsandbytes datasets transformers sentencepiece protobuf
+
+CMD ["python3", "training/train_unsloth.py"]

@@ -1,0 +1,35 @@
+# Virtual environments
+venv/
+venv_linux/
+env/
+.venv/
+CACHEDIR.TAG
+
+# Python cache & build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Logs & temporary runtime outputs
+*.log
+server_err.log
+server_out.log
+train.log
+train_err.log
+flywheel.log
+
+# Large training / intermediate build artifacts (>2GB merged or clones)
+outputs/apex_coder_3b_merged/
+outputs/apex_coder_3b_gguf/
+outputs/*/checkpoint-*/
+training/llama_cpp_repo/
+training/llama_cpp_tools/
+export/cloud_bundles/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

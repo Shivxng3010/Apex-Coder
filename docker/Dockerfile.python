@@ -1,0 +1,21 @@
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+ENV UV_SYSTEM_PYTHON=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /sandbox
+
+# Pre-install common testing and typing dependencies
+RUN uv pip install --no-cache \
+    pytest \
+    pytest-asyncio \
+    pytest-timeout \
+    mypy \
+    ruff
+
+# Create a non-root user for safe execution
+RUN useradd -m -u 1000 sandboxuser && chown -R sandboxuser:sandboxuser /sandbox
+USER sandboxuser
+
+CMD ["pytest", "--maxfail=1", "--timeout=10"]

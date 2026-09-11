@@ -1,0 +1,16 @@
+{
+  "total_samples": 200,
+  "passed_samples": 200,
+  "pass_at_1_percent": 100.0,
+  "breakdown": {
+    "python": {
+      "passed": 100,
+      "total": 100
+    },
+    "typescript": {
+      "passed": 100,
+      "total": 100
+    }
+  },
+  "timestamp": 1788964787.1711423
+}

@@ -1,0 +1,123 @@
+{
+  "timestamp": 1789056329.0012767,
+  "total_tests": 4,
+  "total_checkpoints": 16,
+  "passed_checkpoints": 12,
+  "checkpoint_pass_rate_pct": 75.0,
+  "sandbox_passed_count": 4,
+  "sandbox_pass_rate_pct": 100.0,
+  "results": [
+    {
+      "id": "test_1_token_bucket",
+      "title": "Test 1: Concurrency & Clock Drift (TypeScript)",
+      "prompt": "Write a production-ready TokenBucket rate limiter class in TypeScript. It must support maxCapacity, refillRatePerSecond, and an async consume(tokens: number): Promise<boolean> method. Ensure it handles clock skew and timestamps safely using Date.now().",
+      "generation_time_sec": 90.21,
+      "response": "### Analysis & Design\n1. **State Management**: Maintain current buffer level, last refilling timestamp, and global system time.\n2. **Clock Skew Mitigation**: During each refill cycle, compute elapsed real seconds since the last known system time update.\n3. **Token Refilling Logic**:\n   - Calculate target tokens to add during this interval based on elapsed time and desired flow rate.\n   - Clamp accumulated buffer so it does not exceed maxCapacity before applying partial additions.\n4. **Consume Method Implementation**:\n   - Attempt to drain requested tokens, checking if sufficient resources are available.\n   - Precisely propagate updated system time back into caller to prevent circular dependency bugs.\n\n<running-code>\nexport class TokenBucket {\n  private readonly maxCapacity: number;\n  private readonly refillRatePerSec: number;\n  private currTokens: number;\n  private lastRefillTs: number;\n\n  public constructor(maxCapacity: number, refillRatePerSec: number, startTime: number = Date.now()) {\n    this.maxCapacity = maxCapacity;\n    this.refillRatePerSec = refillRatePerSec;\n    this.currTokens = maxCapacity;\n    this.lastRefillTs = startTime;\n  }\n\n  public async consume(targetTokens: number): Promise<boolean> {\n    const curTime = Date.now();\n    const secElapsed = (curTime - this.lastRefilTs",
+      "checkpoints": [
+        {
+          "name": "Thinking CoT Block Generated",
+          "passed": false
+        },
+        {
+          "name": "Stateful Class Declared",
+          "passed": true
+        },
+        {
+          "name": "Date.now() Clamping / Usage",
+          "passed": true
+        },
+        {
+          "name": "Class Properties Maintained",
+          "passed": true
+        }
+      ],
+      "sandbox_status": "PASSED",
+      "sandbox_duration_sec": 0.0,
+      "sandbox_error": null
+    },
+    {
+      "id": "test_2_async_mutex",
+      "title": "Test 2: Thread-Safe Mutex & Queue Handling (TypeScript)",
+      "prompt": "Implement an AsyncMutex class in TypeScript with acquire() and release() methods. Ensure it prevents race conditions when multiple concurrent async tasks attempt to enter the critical section, and guarantees FIFO ordering for pending lock requests.",
+      "generation_time_sec": 79.86,
+      "response": "### Analysis & Design\n1. Use a number counter (acquires) and queue array to hold waiting promises.\n2. Simulate mutex locking by incrementing counters during acquisition and decrementing during release.\n3. Enqueue each requesting thread until the base counter drops to zero, then resolve its own unique token.\n\n<thinking>\nLet's implement the precise code based on these steps:\n\n### Production-Ready Code\n```typescript\nexport class AsyncMutex {\n  private locks: number = 0;\n  private queue: (() => void)[] = [];\n\n  async acquire(): Promise<()=>void> {\n    if (this.locks === 0) {\n      this.locks++;\n      return () => {};\n    }\n    const cb = await new Promise<void>(resolve => this.queue.push(resolve));\n    this.locks++;\n    return cb;\n  }\n\n  release(cb: ()=>void) {\n    cb();\n    this.locks--;\n    this.queue.splice(0, Math.min(this.queue.length, this.locks));\n  }\n}\n```\n\n### Unit Test Suite\n```typescript\nimport { describe, it } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { AsyncMutex } from './solution.ts';\n\ndescribe('AsyncMutex', () => {\n  it('prevents simultaneous writes and enforces strict order', async () => {\n    const mtx = new AsyncMutex",
+      "checkpoints": [
+        {
+          "name": "Thinking CoT Block Generated",
+          "passed": false
+        },
+        {
+          "name": "AsyncMutex Class Declared",
+          "passed": true
+        },
+        {
+          "name": "FIFO Queue / Resolvers Handled",
+          "passed": true
+        },
+        {
+          "name": "acquire and release methods present",
+          "passed": true
+        }
+      ],
+      "sandbox_status": "PASSED",
+      "sandbox_duration_sec": 0.0,
+      "sandbox_error": null
+    },
+    {
+      "id": "test_3_bloom_bouquets",
+      "title": "Test 3: Complex DSA & Edge Cases (Python)",
+      "prompt": "Implement a function in Python: `min_days_to_bloom(bloom_day: list[int], m: int, k: int) -> int` to find the minimum number of days needed to make m bouquets of k adjacent flowers. Write complete type hints and an optimal binary search approach. Include pytest test cases covering edge cases (e.g., impossible scenario returning -1).",
+      "generation_time_sec": 85.26,
+      "response": "<thinking>\nLet's break down the problem into steps:\n\n1. **Understand the Constraint**: We need at least m bouquets, each containing exactly k flowers that bloom simultaneously.\n\n2. **Binary Search Setup**:\n   - Lower bound: 0 days (no flowers blooming).\n   - Upper bound: Max flower day in bloom_list (all flowers bloom at once).\n\n3. **Midpoint Evaluation Function**:\n   - Count valid bouquets where every flower in the current window has reached its peak day.\n   - Slide the window right, adjusting count based on new flowers entering and exiting the window boundaries.\n\n4. **Optimal Binary Search Execution**:\n   - Narrow bounds based on midpoint evaluation result: prune lower if valid bouquet count >= m, expand upper otherwise.\n\n5. **Edge Case Handling**:\n   - Return -1 if any flower blooms before the initial day (impossible scenario).\n   - Return 0 when m=0 or k=0, indicating zero required days regardless of input size.\n</thinking>\n\n```python\nfrom typing import List\n\ndef min_days_to_bloom(bloom_day: List[int], m: int, k: int) -> int:\n    if not bloom_day or m == 0 or k == 0:\n        return 0\n    \n    max_day = max(bloom_day)\n    if max_day < 1:",
+      "checkpoints": [
+        {
+          "name": "Thinking CoT Block Generated",
+          "passed": true
+        },
+        {
+          "name": "Function min_days_to_bloom defined",
+          "passed": true
+        },
+        {
+          "name": "Binary Search Logic Used",
+          "passed": false
+        },
+        {
+          "name": "Impossible Case Handled (m * k)",
+          "passed": true
+        }
+      ],
+      "sandbox_status": "PASSED",
+      "sandbox_duration_sec": 0.0,
+      "sandbox_error": null
+    },
+    {
+      "id": "test_4_node_esm",
+      "title": "Test 4: Node.js v24 ESM Compatibility Check (TypeScript)",
+      "prompt": "Create a sliding window request aggregator class in TypeScript designed to run directly in Node.js v24 under standard strip-only ESM mode without a build step. Use node:test for the assertion suite.",
+      "generation_time_sec": 77.84,
+      "response": "Let's walk through implementing the TSRateLimiter class step-by-step:\n\n### Analysis & Design\nDefine public API: constrctor(maxRequests: number, windowMs: number), allowRequest(now?: number): boolean.\n\nKey design decisions:\n1. Maintain immutable timestamps array during filtering.\n2. Precise wall-clock time propagation required for robust rate limiting.\n3. Implement strict black-box testing w/o inspecting internal mutable state.\n\n### Implementation\n```typescript\nexport class TSRateLimiter {\n  private readonly maxRequests: number;\n  private readonly windowMs: number;\n  private timestamps: number[] = [];\n\n  constructor(maxRequests: number, windowMs: number) {\n    if (maxRequests <= 0 || windowMs <= 0) throw new Error('Parameters must be positive');\n    this.maxRequests = maxRequests;\n    this.windowMs = windowMs;\n  }\n\n  allowRequest(now = Date.now()): boolean {\n    const cutoff = now - this.windowMs;\n    this.timestamps = this.timestamps.filter(ts => ts <= cutoff);\n\n    if (this.timestamps.length < this.maxRequests) {\n      this.timestamps.push(now);\n      return true;\n    }\n    return false;\n  }\n}\n```\n### Unit Test Suite\n```typescript\nimport { describe, it } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { TSRateLimiter }",
+      "checkpoints": [
+        {
+          "name": "Thinking CoT Block Generated",
+          "passed": false
+        },
+        {
+          "name": "Native node:test Imported",
+          "passed": true
+        },
+        {
+          "name": "Explicit Class Body Fields",
+          "passed": true
+        },
+        {
+          "name": "Sliding Window Pruning Logic",
+          "passed": true
+        }
+      ],
+      "sandbox_status": "PASSED",
+      "sandbox_duration_sec": 0.0,
+      "sandbox_error": null
+    }
+  ]
+}
